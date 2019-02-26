@@ -14,32 +14,17 @@ Options:
 """
 
 import os
-import json
-import requests
 import yaml
 from docopt import docopt
 
-URL_AUTH = 'https://auth.lightwaverf.com/token'
-URL_ROOT = 'https://publicapi.lightwaverf.com'
-URL_GET_STRUCTURE_LIST = URL_ROOT + '/v1/structures'
-URL_GET_STRUCTURE_DETAILS = URL_ROOT + '/v1/structure/%s'
-URL_GET_FEATURE_DETAILS = URL_ROOT + '/v1/feature/%s'
+from pylightwave.auth import LWAuth
+from pylightwave.client import LWClient
+
 
 EXCLUDED_DEVICES = ['L2'] # Don't include the LinkPlus in the structure response (contains geolocation info)
 
 
-class LWAuth:
-
-    def authenticate(self, auth_token, refresher_token):
-        headers = {
-            'Authorization': 'basic %s' % auth_token,
-        }
-        body = {
-            'grant_type': 'refresh_token',
-            'refresh_token': refresher_token
-        }
-        response = requests.post(URL_AUTH, body, headers=headers)
-        return json.loads(response.text)
+class AuthStore:
 
     def store_token(self, auth):
         print auth['access_token']
@@ -54,29 +39,6 @@ class LWAuth:
         else:
             raise 'Please authenticate before sending commands'
 
-
-class LWClient:
-
-    def __init__(self, auth):
-        self.auth = auth
-
-    def get_structure_list(self):
-        response = requests.get(URL_GET_STRUCTURE_LIST, headers=self.__build_headers())
-        return json.loads(response.text)
-
-    def get_structure_details(self, structureId):
-        response = requests.get(URL_GET_STRUCTURE_DETAILS % structureId, headers=self.__build_headers())
-        return json.loads(response.text)
-
-    def get_feature_details(self, featureId):
-        response = requests.get(URL_GET_FEATURE_DETAILS % featureId, headers=self.__build_headers())
-        return json.loads(response.text)
-
-    def __build_headers(self):
-        return {
-            'Content-Type': 'application/json',
-            'Authorization': 'bearer %s' % self.auth['access_token'],
-        }
 
 class StructureHelper:
 
@@ -141,13 +103,14 @@ class OutputWriter:
 
 def main():
     arguments = docopt(__doc__, version='1.0')
-    lwtokens = LWAuth()
+    lw_auth = LWAuth()
+    auth_store = AuthStore()
 
     if arguments['authenticate'] and arguments['<bearer>'] and arguments['<refresh>']:
-        auth = lwtokens.authenticate(arguments['<bearer>'], arguments['<refresh>'])
-        lwtokens.store_token(auth)
+        auth = lw_auth.authenticate(arguments['<bearer>'], arguments['<refresh>'])
+        auth_store.store_token(auth)
     elif arguments['list'] and arguments['all']:
-        client = LWClient(lwtokens.get_token())
+        client = LWClient(auth_store.get_token())
         devices = StructureHelper(client).parse_structures()
         OutputWriter().print_output(devices, arguments['--file'])
     else:
