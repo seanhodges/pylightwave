@@ -29,11 +29,11 @@ class LWClient:
                 headers=self.__build_headers())
         return json.loads(response.text)['value']
 
-    def set_feature_value(self, feature_id):
+    def set_feature_value(self, feature_id, value):
         body = json.dumps({ 'value': value })
         response = requests.post(URL_FEATURE_VALUE % feature_id, data=body, \
                 headers=self.__build_headers())
-        return response.status == 200
+        return response.status_code == 200
 
     def get_feature_values(self, feature_ids):
         body = json.dumps({ 'features': features_value_pairs })
@@ -45,7 +45,7 @@ class LWClient:
         body = json.dumps({ 'features': features_value_pairs })
         response = requests.post(URL_BATCH_FEATURE_VALUE % 'write', data=body, \
                 headers=self.__build_headers())
-        return response.status == 200
+        return response.status_code == 200
 
     def __build_headers(self):
         return {

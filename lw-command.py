@@ -2,8 +2,8 @@
 
 Usage:
   lw-command.py authenticate <bearer> <refresh>
-  lw-command.py set <feature id> <value>
-  lw-command.py get <feature id> <value>
+  lw-command.py set <featureid> <value>
+  lw-command.py get <featureid>
   lw-command.py (-h | --help)
   lw-command.py --version
 
@@ -24,7 +24,6 @@ from pylightwave.client import LWClient
 class AuthStore:
 
     def store_token(self, auth):
-        print auth['access_token']
         with open('.auth.yaml', 'w') as file_handle:
             yaml.safe_dump(auth, file_handle, default_flow_style=False, encoding='utf-8', allow_unicode=True)
 
@@ -45,12 +44,12 @@ def main():
         lw_auth = LWAuth()
         auth = lw_auth.refresh(arguments['<bearer>'], arguments['<refresh>'])
         auth_store.store_token(auth)
-    elif arguments['set'] and arguments['<feature id>'] and arguments['<value>']:
+    elif arguments['set'] and arguments['<featureid>'] and arguments['<value>']:
         client = LWClient(auth_store.get_token())
-        client.set_feature_value(arguments['<feature id>'], arguments['<value>']
-    elif arguments['get'] and arguments['<feature id>']:
+        client.set_feature_value(arguments['<featureid>'], arguments['<value>'])
+    elif arguments['get'] and arguments['<featureid>']:
         client = LWClient(auth_store.get_token())
-        print client.get_feature_value(arguments['<feature id>']
+        print client.get_feature_value(arguments['<featureid>'])
     else:
         print 'Command not supported at this time'
         exit(1)

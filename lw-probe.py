@@ -28,7 +28,6 @@ EXCLUDED_DEVICES = ['L2'] # Don't include the LinkPlus in the structure response
 class AuthStore:
 
     def store_token(self, auth):
-        print auth['access_token']
         with open('.auth.yaml', 'w') as file_handle:
             yaml.safe_dump(auth, file_handle, default_flow_style=False, encoding='utf-8', allow_unicode=True)
 
