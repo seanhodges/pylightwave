@@ -48,8 +48,8 @@ class StructureHelper:
     def parse_structures(self):
         result = []
         root = self.client.get_structure_list()
-        for structureId in root['structures']:
-            group_details = self.client.get_structure_details(structureId)
+        for structure_id in root['structures']:
+            group_details = self.client.get_structure_details(structure_id)
             print 'Found group: %s' % group_details['name']
             result.append({
                 'name': group_details['name'],
@@ -107,7 +107,7 @@ def main():
     auth_store = AuthStore()
 
     if arguments['authenticate'] and arguments['<bearer>'] and arguments['<refresh>']:
-        auth = lw_auth.authenticate(arguments['<bearer>'], arguments['<refresh>'])
+        auth = lw_auth.refresh(arguments['<bearer>'], arguments['<refresh>'])
         auth_store.store_token(auth)
     elif arguments['list'] and arguments['all']:
         client = LWClient(auth_store.get_token())

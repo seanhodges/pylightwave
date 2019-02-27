@@ -7,7 +7,7 @@ URL_AUTH = 'https://auth.lightwaverf.com/token'
 
 class LWAuth:
 
-    def authenticate(self, auth_token, refresher_token):
+    def refresh(self, auth_token, refresher_token):
         headers = {
             'Authorization': 'basic %s' % auth_token,
         }
