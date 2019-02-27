@@ -2,14 +2,15 @@
 
 Usage:
   lw-probe.py authenticate <bearer> <refresh>
-  lw-probe.py [--file=FILE] list all
+  lw-probe.py [--file=FILE] list all [--include-values]
   lw-probe.py (-h | --help)
   lw-probe.py --version
 
 Options:
-  -h --help     Show this screen.
-  --version     Show version.
-  --file=FILE   Write output to file
+  -h --help         Show this screen.
+  --version         Show version.
+  --file=FILE       Write output to file
+  --include-values  Also lookup feature values (slower)
 
 """
 
@@ -42,8 +43,9 @@ class AuthStore:
 
 class StructureHelper:
 
-    def __init__(self, client):
+    def __init__(self, client, include_feature_values=False):
         self.client = client
+        self.include_feature_values = include_feature_values
 
     def parse_structures(self):
         result = []
@@ -74,13 +76,20 @@ class StructureHelper:
         result_features = []
         for feature_set in feature_sets:
             for feature in feature_set['features']:
-                feature_details = self.client.get_feature_details(feature['featureId'])
-                result_features.append({
-                    'id': feature['featureId'],
-                    'type': feature['type'],
-                    'writable': feature['writable'],
-                    'value': feature_details['value']
-                })
+                if self.include_feature_values:
+                    feature_value = self.client.get_feature_value(feature['featureId'])
+                    result_features.append({
+                        'id': feature['featureId'],
+                        'type': feature['type'],
+                        'writable': feature['writable'],
+                        'value': feature_value,
+                    })
+                else:
+                    result_features.append({
+                        'id': feature['featureId'],
+                        'type': feature['type'],
+                        'writable': feature['writable'],
+                    })
         return result_features
 
 
@@ -93,11 +102,13 @@ class OutputWriter:
             self.__print_to_stdout(data)
 
     def __print_to_stdout(self, data):
-        print yaml.safe_dump(data, encoding='utf-8', allow_unicode=True)
+        print yaml.safe_dump(data, encoding='utf-8', allow_unicode=True, \
+                default_flow_style=False)
 
     def __print_to_file(self, data, output_file):
         with open(output_file, 'w') as file_handle:
-            yaml.safe_dump(data, file_handle, encoding='utf-8', allow_unicode=True)
+            yaml.safe_dump(data, file_handle, encoding='utf-8', allow_unicode=True, \
+                    default_flow_style=False)
         print 'Output written to %s' % output_file
 
 
@@ -111,7 +122,8 @@ def main():
         auth_store.store_token(auth)
     elif arguments['list'] and arguments['all']:
         client = LWClient(auth_store.get_token())
-        devices = StructureHelper(client).parse_structures()
+        struct_helper = StructureHelper(client, arguments['--include-values'])
+        devices = struct_helper.parse_structures()
         OutputWriter().print_output(devices, arguments['--file'])
     else:
         print 'Command not supported at this time'
