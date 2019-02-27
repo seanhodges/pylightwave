@@ -4,6 +4,22 @@
 
 A basic Python library for Lightwave "v2" LinkPlus API.
 
+##  Installation
+
+Fastest way to use the tools is to clone the repository and install the dependencies with pip:
+
+```bash
+pip install -r requirements.txt
+```
+
+Alternatively, you can install the library also using pip:
+
+```bash
+pip install git@github.com:seanhodges/pylightwave.git
+```
+
+At some point I'll publish a proper PIP package
+
 ##  Tool usage
 
 This project comes with some simple command-line tools that demonstrate how to use the library. Use `--help` to get usage help.
@@ -30,4 +46,4 @@ lw_auth = LWAuth()
 tokens = lw_auth.refresh('<bearer token>', '<refresh token>')
 lw_client = LWClient(tokens)
 print lw_client.get_feature_value('<feature id>')
-
+```
