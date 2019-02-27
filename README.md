@@ -26,7 +26,6 @@ This project comes with some simple command-line tools that demonstrate how to u
 
 * lw-probe.py - Retrieve device and feature information (including feature ID's)
 * lw-command.py - Send commands to device capabilities (features)
-* lw-event.py - Listen to events from v2 devices
 
 ##  Library usage
 
